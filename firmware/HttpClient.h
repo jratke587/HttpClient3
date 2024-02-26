@@ -61,11 +61,13 @@ public:
     * Public references to variables.
     */
     TCPClient client;
-    char buffer[1024];
+    char *buffer;
+    unsigned int bufferSize;
 
     /**
     * Constructor.
     */
+    HttpClient(unsigned int bufferSize);
     HttpClient(void);
 
     /**

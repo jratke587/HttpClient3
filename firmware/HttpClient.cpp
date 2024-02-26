@@ -5,9 +5,14 @@ static const uint16_t DEFAULT_TIMEOUT = 5000; // Allow maximum 5s between data p
 /**
 * Constructor.
 */
+HttpClient::HttpClient(unsigned int bufferSize)
+{
+    buffer = (char *)malloc(sizeof(char) * bufferSize);
+    this->bufferSize = bufferSize;
+}
 HttpClient::HttpClient()
 {
-
+    HttpClient(1024);
 }
 
 /**
@@ -158,7 +163,7 @@ void HttpClient::request(http_request_t &aRequest, http_response_t &aResponse, h
     #endif
 
     // clear response buffer
-    memset(&buffer[0], 0, sizeof(buffer));
+    memset(&buffer[0], 0, bufferSize);
 
 
     //
@@ -212,7 +217,7 @@ void HttpClient::request(http_request_t &aRequest, http_response_t &aResponse, h
                     // End of headers.  Grab the status code and reset the buffer.
                     aResponse.status = atoi(&buffer[9]);
 
-                    memset(&buffer[0], 0, sizeof(buffer));
+                    memset(&buffer[0], 0, bufferSize);
                     bufferPosition = 0;
                     inHeaders = false;
                     #ifdef LOGGING
@@ -227,9 +232,9 @@ void HttpClient::request(http_request_t &aRequest, http_response_t &aResponse, h
             }
 
             // Check that received character fits in buffer before storing.
-            if (bufferPosition < sizeof(buffer)-1) {
+            if (bufferPosition < bufferSize-1) {
                 buffer[bufferPosition] = c;
-            } else if ((bufferPosition == sizeof(buffer)-1)) {
+            } else if ((bufferPosition == bufferSize-1)) {
                 buffer[bufferPosition] = '\0'; // Null-terminate buffer
                 client.stop();
                 error = true;
